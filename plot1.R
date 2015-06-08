@@ -1,35 +1,40 @@
 plot1 <- function() {
 
-## Plot 1 for Exploritory Data Analysis Project 1
+  ## Plot 1 for Exploritory Data Analysis Project 1
 
-## Uses the Electric power consumption dataset from UCI Machine Learning
+  ## Uses the Electric power consumption dataset from UCI Machine Learning
   
-## Measurements of electric power consumption in one household with 
-## a one-minute sampling rate over a period of almost 4 years. Different 
-## electrical quantities and some sub-metering values are available.
+  ## Measurements of electric power consumption in one household with 
+  ## a one-minute sampling rate over a period of almost 4 years. Different 
+  ## electrical quantities and some sub-metering values are available.
 
-## install.packages("utils")
-## install.packages("sqldf")
-library(sqldf)
+  library(sqldf)
 
-dir.create("./data/", showWarnings = FALSE)
+  ## Create a directory for the download
+  dir.create("./data/", showWarnings = FALSE)
 
-url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
-destination <- "./data/epc.zip"
-if (!file.exists(destination)) {
-  download.file(url, destination)
-}
-message("File downloaded")
+  ## Set data file variables
+  url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+  destination <- "./data/epc.zip"
 
-data <- read.csv.sql(unzip(destination), sql = "select * from file where Date in ('1/2/2007','2/2/2007')", header = TRUE, sep = ";")
+  ## If the file has already been downloaded, skip the download
+  if (!file.exists(destination)) {
+    download.file(url, destination)
+    message("File downloaded")
+  }
+  message("File already downloaded")
 
-## message(head(data))
+  ## Use sql to read in only the data for the choosen dates
+  data <- read.csv.sql(unzip(destination), 
+       sql = "select * from file where Date in ('1/2/2007','2/2/2007')",
+       header = TRUE, sep = ";")
 
-png(file = "./plot1.png", width = 480, height = 480) ## open PNG device
-hist(data$Global_active_power, main = "Global Active Power", 
-     xlab = "Global Acitve Power (kilowatts)", col="red")
-dev.off()
+  ## Create a 480 x 480 PNG file with the requested plot
+  png(file = "./plot1.png", width = 480, height = 480) ## open PNG device
+  hist(data$Global_active_power, main = "Global Active Power", 
+       xlab = "Global Acitve Power (kilowatts)", col="red")
+  dev.off() ## Don't forget to close the device
 
-message("PNG file created")
+  message("PNG file created")
 
 }

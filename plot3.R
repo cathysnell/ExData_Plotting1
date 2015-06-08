@@ -10,21 +10,31 @@ plot3 <- function() {
   
   library(sqldf)
   
+  ## Create a directory for the download
   dir.create("./data/", showWarnings = FALSE)
   
+  ## Set data file variables
   url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
   destination <- "./data/epc.zip"
+  
+  ## If the file has already been downloaded, skip the download
   if (!file.exists(destination)) {
     download.file(url, destination)
+    message("File downloaded")
   }
-  message("File downloaded")
+  message("File already downloaded")
   
-  data <- read.csv.sql(unzip(destination), sql = "select * from file where Date in ('1/2/2007','2/2/2007')", header = TRUE, sep = ";")
+  ## Use sql to read in only the data for the choosen dates
+  data <- read.csv.sql(unzip(destination), 
+        sql = "select * from file where Date in ('1/2/2007','2/2/2007')", 
+        header = TRUE, sep = ";")
   
+  ## Combine Date and Time into a single column and change to Date class
   data <- cbind(paste(data$Date, data$Time), data)
   names(data) <- c("Datetime", names(data)[2:10])
   data$Datetime <- strptime(data$Datetime, format = "%d/%m/%Y %H:%M:%S")
   
+  ## Create a 480 x 480 PNG file with the requested plot
   png(file = "./plot3.png", width = 480, height = 480) ## open PNG device
   with(data, plot(Datetime, Sub_metering_1, type = "l",
                   ylab = "Energy sub metering",
@@ -33,7 +43,7 @@ plot3 <- function() {
   with(data, lines(Datetime, Sub_metering_3, col="blue"))
   legend("topright", lty = 1, col = c("black", "red", "blue"), 
          legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
-  dev.off()
+  dev.off()  ## Don't forget to close the device
   
   message("PNG file created")
   
